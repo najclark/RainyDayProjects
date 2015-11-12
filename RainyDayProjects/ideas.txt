@@ -9,3 +9,4 @@ ________________________________________________________________________________
 1.Stock predictor. (Based on average trends)
 2.Middle/Upper school schedule fixer. (Creates a middle school schedule with an upper school class)
 3.Spell checker with word prediction.
+4.Mosaic Maker. COMPLETE
