@@ -18,8 +18,6 @@ public class Stock {
 	ArrayList<Double> avgTrend = new ArrayList<Double>(); // change if BOTH
 	ArrayList<Double> avgHigh = new ArrayList<Double>(); // change if UP
 	ArrayList<Double> avgLow = new ArrayList<Double>(); // change if DOWN
-	// ArrayList<Double> upStreak = new ArrayList<Double>(); // change if UP
-	// ArrayList<Double> downStreak = new ArrayList<Double>(); // change if DOWN
 	static GraphPanel gp, buy;
 
 	double multiplier = 1;
