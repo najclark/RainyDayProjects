@@ -140,4 +140,23 @@ public class StockQuote {
 			old_price = new_price;
 		}
 	}
+	
+	public static double generateSlope(ArrayList<Double> prices){
+		ArrayList<Double> x = new ArrayList<Double>();
+		ArrayList<Double> y = new ArrayList<Double>();
+		ArrayList<Double> xy = new ArrayList<Double>();
+		ArrayList<Double> x2 = new ArrayList<Double>();
+		for(int i = 0; i < prices.size(); i++){
+			x.add((double)i);
+			y.add(prices.get(i));
+			xy.add(i*prices.get(i));
+			x2.add((double)(i*i));
+		}
+		double meanX = StockQuote.avg(x);
+		double meanY = StockQuote.avg(y);
+		double meanXY = StockQuote.avg(xy);
+		double meanX2 = StockQuote.avg(x2);
+		
+		return (meanX * meanY - meanXY)/(meanX * meanX - meanX2);
+	}
 }

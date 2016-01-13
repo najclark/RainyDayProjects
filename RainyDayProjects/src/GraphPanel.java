@@ -29,6 +29,8 @@ public class GraphPanel extends JPanel {
 	private int padding = 25;
 	private int labelPadding = 25;
 	private Color lineColor = new Color(44, 102, 230, 180);
+	private Color topColor = new Color(72, 255, 0);
+	private Color bottomColor = new Color(255, 60, 0);
 	private Color pointColor = new Color(100, 100, 100, 180);
 	private Color gridColor = new Color(200, 200, 200, 200);
 	private static final Stroke GRAPH_STROKE = new BasicStroke(2f);
@@ -36,12 +38,17 @@ public class GraphPanel extends JPanel {
 	private int numberYDivisions = 10;
 	private List<Double> scores;
 	private static JFrame frame;
+	private static String name = "DrawGraph";
+	private static double top = 0;
+	private static double bottom = 0;
+	
 
 	public GraphPanel(List<Double> scores) {
 		this.scores = scores;
 	}
 	
-	public GraphPanel() {
+	public GraphPanel(String name) {
+		this.name = name;
 		scores = new ArrayList<Double>();
 		createDontRead();
 	}
@@ -50,6 +57,20 @@ public class GraphPanel extends JPanel {
 		scores.add(y);
 		this.repaint();
 		frame.repaint();
+	}
+	
+	public void plotPoint(int x, double y){
+		scores.add(x, y);
+		this.repaint();
+		frame.repaint();
+	}
+	
+	public void setTop(double top){
+		this.top = top;
+	}
+	
+	public void setBottom(double bottom){
+		this.bottom = bottom;
 	}
 
 	@Override
@@ -66,6 +87,20 @@ public class GraphPanel extends JPanel {
 			int x1 = (int) (i * xScale + padding + labelPadding);
 			int y1 = (int) ((getMaxScore() - scores.get(i)) * yScale + padding);
 			graphPoints.add(new Point(x1, y1));
+		}
+		
+		List<Point> high = new ArrayList<>();
+		for (int i = 0; i < scores.size(); i++) {
+			int x1 = (int) (i * xScale + padding + labelPadding);
+			int y1 = (int) ((getMaxScore() - top) * yScale + padding);
+			high.add(new Point(x1, y1));
+		}
+		
+		List<Point> low = new ArrayList<>();
+		for (int i = 0; i < scores.size(); i++) {
+			int x1 = (int) (i * xScale + padding + labelPadding);
+			int y1 = (int) ((getMaxScore() + bottom) * yScale + padding);
+			low.add(new Point(x1, y1));
 		}
 
 		// draw white background
@@ -139,6 +174,48 @@ public class GraphPanel extends JPanel {
 			int ovalH = pointWidth;
 			g2.fillOval(x, y, ovalW, ovalH);
 		}
+		//TODO
+		oldStroke = g2.getStroke();
+		g2.setColor(topColor);
+		g2.setStroke(GRAPH_STROKE);
+		for (int i = 0; i < high.size() - 1; i++) {
+			int x1 = high.get(i).x;
+			int y1 = high.get(i).y;
+			int x2 = high.get(i + 1).x;
+			int y2 = high.get(i + 1).y;
+			g2.drawLine(x1, y1, x2, y2);
+		}
+
+		g2.setStroke(oldStroke);
+		g2.setColor(pointColor);
+		for (int i = 0; i < high.size(); i++) {
+			int x = high.get(i).x - pointWidth / 2;
+			int y = high.get(i).y - pointWidth / 2;
+			int ovalW = pointWidth;
+			int ovalH = pointWidth;
+			g2.fillOval(x, y, ovalW, ovalH);
+		}
+		
+		oldStroke = g2.getStroke();
+		g2.setColor(bottomColor);
+		g2.setStroke(GRAPH_STROKE);
+		for (int i = 0; i < low.size() - 1; i++) {
+			int x1 = low.get(i).x;
+			int y1 = low.get(i).y;
+			int x2 = low.get(i + 1).x;
+			int y2 = low.get(i + 1).y;
+			g2.drawLine(x1, y1, x2, y2);
+		}
+
+		g2.setStroke(oldStroke);
+		g2.setColor(pointColor);
+		for (int i = 0; i < low.size(); i++) {
+			int x = low.get(i).x - pointWidth / 2;
+			int y = low.get(i).y - pointWidth / 2;
+			int ovalW = pointWidth;
+			int ovalH = pointWidth;
+			g2.fillOval(x, y, ovalW, ovalH);
+		}
 	}
 
 	// @Override
@@ -190,7 +267,7 @@ public class GraphPanel extends JPanel {
 		// }
 		GraphPanel mainPanel = new GraphPanel(scores);
 		mainPanel.setPreferredSize(new Dimension(800, 600));
-		frame = new JFrame("DrawGraph");
+		frame = new JFrame(name);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setExtendedState( frame.getExtendedState()|JFrame.MAXIMIZED_BOTH );
 		frame.getContentPane().add(mainPanel);
@@ -202,7 +279,7 @@ public class GraphPanel extends JPanel {
 	private void createDontRead() {
 		GraphPanel mainPanel = new GraphPanel(scores);
 		mainPanel.setPreferredSize(new Dimension(800, 600));
-		frame = new JFrame("DrawGraph");
+		frame = new JFrame(name);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setExtendedState( frame.getExtendedState()|JFrame.MAXIMIZED_BOTH );
 		frame.getContentPane().add(mainPanel);
@@ -214,7 +291,7 @@ public class GraphPanel extends JPanel {
 	public static void main(String[] args) {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
-				new GraphPanel().createAndShowGui();
+				new GraphPanel("DrawGraph").createAndShowGui();
 			}
 		});
 	}
