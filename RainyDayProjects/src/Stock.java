@@ -1,5 +1,6 @@
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Scanner;
 
 public class Stock {
@@ -28,11 +29,16 @@ public class Stock {
 	String slope;
 	int streak, days = 0;
 	int slopePerDays = 10;
+	int smallDays = -1;
+	int wipes = 0;
+	int lastMaxDays = 0;
 
 	public static void main(String[] args) {
 		// StockQuote.generateStock(1000, 10);
 		gp = new GraphPanel("Stock: " + symbol);
 		buy = new GraphPanel("Bot: " + symbol);
+		gp.setTop(0);
+		gp.setBottom(0);
 		buy.setTop(threshold);
 		buy.setBottom(threshold);
 		new Stock().once();
@@ -70,8 +76,12 @@ public class Stock {
 			System.out.println("Price: $" + price);
 			System.out.println("Slope: " + slope);
 			System.out.println("Days: " + days);
-			gp.plotPoint(price);
-			new Scanner(System.in).next();
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		}
 		// daily();
 	}
@@ -93,6 +103,10 @@ public class Stock {
 	}
 
 	public void setData(double price, double lastPrice) {
+		Calendar cal = Calendar.getInstance();
+		int maxDaysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
+		int maxDaysInYear = cal.getActualMaximum(Calendar.DAY_OF_YEAR);
+
 		prices.add(price);
 		NumberFormat nf = NumberFormat.getInstance();
 		nf.setMaximumFractionDigits(2);
@@ -120,17 +134,36 @@ public class Stock {
 			avg--;
 			downTrend.add(Double.parseDouble(nf.format(diff * -1 * multiplier)));
 		}
-		if (days > slopePerDays-1) {
+		if (smallDays > slopePerDays - 1 || wipes > 0) {
 			ArrayList<Double> lastDays = new ArrayList<Double>();
-			for(int i = prices.size()-slopePerDays; i < prices.size(); i++){
+			for (int i = prices.size() - slopePerDays; i < prices.size(); i++) {
 				lastDays.add(prices.get(i));
 			}
 			nf.setMaximumFractionDigits(5);
 			slope = nf.format(StockQuote.generateSlope(lastDays));
-			buy.plotPoint(days-slopePerDays, Double.valueOf(slope));
+			if (wipes == 0) {
+				gp.plotPoint(smallDays - slopePerDays, price);
+				buy.plotPoint(smallDays - slopePerDays, Double.valueOf(slope));
+			} else {
+				gp.plotPoint(smallDays, price);
+				buy.plotPoint(smallDays, Double.valueOf(slope));
+			}
 		}
 		// avgTrend.add(Double.parseDouble(nf.format(diff * multiplier)));
 		days++;
+		smallDays++;
 		lastPrice = price;
+
+		if (smallDays > maxDaysInMonth) {
+			wipes++;
+			smallDays = 0;
+			buy.wipe();
+		}
+		if (smallDays > maxDaysInYear) {
+			wipes++;
+			smallDays = 0;
+			buy.wipe();
+			gp.wipe();
+		}
 	}
 }

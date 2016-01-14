@@ -42,8 +42,9 @@ public class LinearRegression {
 		int df = n - 2;
 		double rss = 0.0; // residual sum of squares
 		double ssr = 0.0; // regression sum of squares
+		double fit=0;
 		for (int i = 0; i < n; i++) {
-			double fit = beta1 * x[i] + beta0;
+			fit = beta1 * x[i] + beta0;
 			rss += (fit - y[i]) * (fit - y[i]);
 			ssr += (fit - ybar) * (fit - ybar);
 		}

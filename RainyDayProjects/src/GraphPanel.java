@@ -41,35 +41,48 @@ public class GraphPanel extends JPanel {
 	private static String name = "DrawGraph";
 	private static double top = 0;
 	private static double bottom = 0;
-	
 
 	public GraphPanel(List<Double> scores) {
 		this.scores = scores;
 	}
-	
+
 	public GraphPanel(String name) {
 		this.name = name;
 		scores = new ArrayList<Double>();
 		createDontRead();
 	}
-	
-	public void plotPoint(double y){
+
+	public void plotPoint(double y) {
 		scores.add(y);
 		this.repaint();
 		frame.repaint();
 	}
-	
-	public void plotPoint(int x, double y){
+
+	public void plotPoint(int x, double y) {
 		scores.add(x, y);
 		this.repaint();
 		frame.repaint();
 	}
-	
-	public void setTop(double top){
+
+	public void setTop(double top) {
 		this.top = top;
 	}
-	
-	public void setBottom(double bottom){
+
+	public void wipe() {
+		scores.clear();
+		this.repaint();
+		frame.repaint();
+	}
+
+	public ArrayList<Double> getLastPoints(int points) {
+		ArrayList<Double> list = new ArrayList<Double>();
+		for (int i = (-1 * points) - 1; i < 0; i++) {
+			list.add(scores.get(scores.size() - i));
+		}
+		return list;
+	}
+
+	public void setBottom(double bottom) {
 		this.bottom = bottom;
 	}
 
@@ -88,14 +101,14 @@ public class GraphPanel extends JPanel {
 			int y1 = (int) ((getMaxScore() - scores.get(i)) * yScale + padding);
 			graphPoints.add(new Point(x1, y1));
 		}
-		
+
 		List<Point> high = new ArrayList<>();
 		for (int i = 0; i < scores.size(); i++) {
 			int x1 = (int) (i * xScale + padding + labelPadding);
 			int y1 = (int) ((getMaxScore() - top) * yScale + padding);
 			high.add(new Point(x1, y1));
 		}
-		
+
 		List<Point> low = new ArrayList<>();
 		for (int i = 0; i < scores.size(); i++) {
 			int x1 = (int) (i * xScale + padding + labelPadding);
@@ -174,7 +187,7 @@ public class GraphPanel extends JPanel {
 			int ovalH = pointWidth;
 			g2.fillOval(x, y, ovalW, ovalH);
 		}
-		//TODO
+		// TODO
 		oldStroke = g2.getStroke();
 		g2.setColor(topColor);
 		g2.setStroke(GRAPH_STROKE);
@@ -195,7 +208,7 @@ public class GraphPanel extends JPanel {
 			int ovalH = pointWidth;
 			g2.fillOval(x, y, ovalW, ovalH);
 		}
-		
+
 		oldStroke = g2.getStroke();
 		g2.setColor(bottomColor);
 		g2.setStroke(GRAPH_STROKE);
@@ -257,7 +270,7 @@ public class GraphPanel extends JPanel {
 				scores.add(Double.parseDouble(line.trim()));
 			}
 		}
-		
+
 		// Random random = new Random();
 		// int maxDataPoints = 40;
 		// int maxScore = 10;
@@ -269,19 +282,19 @@ public class GraphPanel extends JPanel {
 		mainPanel.setPreferredSize(new Dimension(800, 600));
 		frame = new JFrame(name);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setExtendedState( frame.getExtendedState()|JFrame.MAXIMIZED_BOTH );
+		frame.setExtendedState(frame.getExtendedState() | JFrame.MAXIMIZED_BOTH);
 		frame.getContentPane().add(mainPanel);
 		frame.pack();
 		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
 	}
-	
+
 	private void createDontRead() {
 		GraphPanel mainPanel = new GraphPanel(scores);
 		mainPanel.setPreferredSize(new Dimension(800, 600));
 		frame = new JFrame(name);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		frame.setExtendedState( frame.getExtendedState()|JFrame.MAXIMIZED_BOTH );
+		frame.setExtendedState(frame.getExtendedState() | JFrame.MAXIMIZED_BOTH);
 		frame.getContentPane().add(mainPanel);
 		frame.pack();
 		frame.setLocationRelativeTo(null);
