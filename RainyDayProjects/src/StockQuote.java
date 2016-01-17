@@ -8,7 +8,11 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.NumberFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.SimpleTimeZone;
 
 public class StockQuote {
 
@@ -158,5 +162,17 @@ public class StockQuote {
 		double meanX2 = StockQuote.avg(x2);
 		
 		return (meanX * meanY - meanXY)/(meanX * meanX - meanX2);
+	}
+	
+	public static Date toUTC(Date d) {
+		SimpleDateFormat sdf = new SimpleDateFormat();
+		sdf.setTimeZone(new SimpleTimeZone(SimpleTimeZone.UTC_TIME, "UTC"));
+		Date utcCur = null;
+		try {
+			utcCur = sdf.parse(d.toString());
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+		return utcCur;
 	}
 }

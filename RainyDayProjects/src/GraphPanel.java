@@ -29,8 +29,8 @@ public class GraphPanel extends JPanel {
 	private int padding = 25;
 	private int labelPadding = 25;
 	private Color lineColor = new Color(44, 102, 230, 180);
-	private Color topColor = new Color(72, 255, 0);
-	private Color bottomColor = new Color(255, 60, 0);
+	private Color sellColor = new Color(72, 255, 0);
+	private Color buyColor = new Color(255, 60, 0);
 	private Color pointColor = new Color(100, 100, 100, 180);
 	private Color gridColor = new Color(200, 200, 200, 200);
 	private static final Stroke GRAPH_STROKE = new BasicStroke(2f);
@@ -189,7 +189,7 @@ public class GraphPanel extends JPanel {
 		}
 		// TODO
 		oldStroke = g2.getStroke();
-		g2.setColor(topColor);
+		g2.setColor(buyColor);
 		g2.setStroke(GRAPH_STROKE);
 		for (int i = 0; i < high.size() - 1; i++) {
 			int x1 = high.get(i).x;
@@ -210,7 +210,7 @@ public class GraphPanel extends JPanel {
 		}
 
 		oldStroke = g2.getStroke();
-		g2.setColor(bottomColor);
+		g2.setColor(sellColor);
 		g2.setStroke(GRAPH_STROKE);
 		for (int i = 0; i < low.size() - 1; i++) {
 			int x1 = low.get(i).x;
@@ -238,7 +238,8 @@ public class GraphPanel extends JPanel {
 
 	private double getMinScore() {
 		double minScore = Double.MAX_VALUE;
-		for (Double score : scores) {
+		for (int i = 0; i < scores.size(); i++) {
+			double score = scores.get(i);
 			minScore = Math.min(minScore, score);
 		}
 		return minScore;
@@ -246,7 +247,8 @@ public class GraphPanel extends JPanel {
 
 	private double getMaxScore() {
 		double maxScore = Double.MIN_VALUE;
-		for (Double score : scores) {
+		for (int i = 0; i < scores.size(); i++) {
+			double score = scores.get(i);
 			maxScore = Math.max(maxScore, score);
 		}
 		return maxScore;

@@ -1,40 +1,25 @@
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Scanner;
+import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class Stock {
 
 	String f = System.getProperty("user.dir") + "/src/memory.txt";
 	static String symbol = "goog";
-
-	/*
-	 * How it works trends
-	 * 
-	 * 
-	 */
 	ArrayList<Double> prices = new ArrayList<Double>();
-	ArrayList<Double> upTrend = new ArrayList<Double>(); // change if UP
-	ArrayList<Double> downTrend = new ArrayList<Double>();// change if DOWN
-	ArrayList<Double> avgTrend = new ArrayList<Double>(); // change if BOTH
-	ArrayList<Double> avgHigh = new ArrayList<Double>(); // change if UP
-	ArrayList<Double> avgLow = new ArrayList<Double>(); // change if DOWN
 	static GraphPanel gp, buy;
 
-	double multiplier = 1;
-	double lastPrice = 0;
-	double avg = 0;
 	static double threshold = 0.02;
-	double upStreak, downStreak;
 	String slope;
-	int streak, days = 0;
 	int slopePerDays = 10;
-	int smallDays = -1;
+	int readings = -1;
 	int wipes = 0;
-	int lastMaxDays = 0;
+	Date open, close;
 
 	public static void main(String[] args) {
-		// StockQuote.generateStock(1000, 10);
 		gp = new GraphPanel("Stock: " + symbol);
 		buy = new GraphPanel("Bot: " + symbol);
 		gp.setTop(0);
@@ -45,123 +30,93 @@ public class Stock {
 	}
 
 	public void once() {
+		open = new Date();
+		close = new Date();
+
+		Timer timer = new Timer();
 		String memory = StockQuote.readFile(f);
-		lastPrice = Double.valueOf(memory.split("\n")[0].split(":")[0].trim());
 		double price;
 		for (String line : memory.split("\n")) {
-			price = Double.parseDouble(line.split(":")[0].trim());
+			if (line != "") {
+				price = Double.parseDouble(line.split(":")[0].trim());
 
-			setData(price, lastPrice);
-			lastPrice = price;
-
-			System.out.println();
-			System.out.println();
-			System.out.println();
-			System.out.println();
-			System.out.println();
-			System.out.println();
-			System.out.println();
-			System.out.println();
-			System.out.println();
-			System.out.println();
-
-			System.out.println("upTrend: " + StockQuote.avg(upTrend));
-			System.out.println("downTrend: " + StockQuote.avg(downTrend));
-			System.out.println("avgTrend: " + avg);
-			System.out.println("avgHigh: " + StockQuote.avg(avgHigh));
-			System.out.println("avgLow: " + StockQuote.avg(avgLow));
-			System.out.println("upStreak: " + upStreak);
-			System.out.println("downStreak: " + downStreak);
-			System.out.println("streak: " + streak);
-			System.out.println("Price: $" + price);
-			System.out.println("Slope: " + slope);
-			System.out.println("Days: " + days);
-			try {
-				Thread.sleep(1000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+				setData(price);
 			}
 		}
-		// daily();
+
+		TimerTask hourlyTask = new TimerTask() {
+			@Override
+			public void run() {
+				daily();
+			}
+		};
+		while (new Date().getMinutes() != 59)
+			; // Align on the hour
+		timer.schedule(hourlyTask, 0l, 1000 * 60 * 60);
+
+		while (new Date().getHours() != 24)
+			; // Align on the day
+		timer.schedule(new TimerTask() {
+			@Override
+			public void run() {
+				open = new Date();
+				close = new Date();
+
+				open = StockQuote.toUTC(open);
+				close = StockQuote.toUTC(close);
+
+				open.setHours(14);
+				open.setMinutes(30);
+				close.setHours(21);
+
+			}
+		}, 0l, 1000 * 60 * 60 * 24);
 	}
 
 	public void daily() {
-		double price = StockQuote.priceOf(symbol);
-		StockQuote.writeFile(price + " : " + StockQuote.dateOf(symbol), f);
-		setData(price, lastPrice);
+		Date cur = new Date();
 
-		System.out.println("upTrend: " + StockQuote.avg(upTrend));
-		System.out.println("downTrend: " + StockQuote.avg(downTrend));
-		System.out.println("avgTrend: " + StockQuote.avg(avgTrend));
-		System.out.println("avgHigh: " + StockQuote.avg(avgHigh));
-		System.out.println("avgLow: " + StockQuote.avg(avgLow));
-		// System.out.println("upStreak: " + StockQuote.avg(upStreak));
-		// System.out.println("downStreak: " + StockQuote.avg(downStreak));
-		System.out.println("streak: " + streak);
-		System.out.println("Days: " + days);
+		cur = StockQuote.toUTC(cur);
+
+		if (cur.after(open) && cur.before(close)) {
+			double price = StockQuote.priceOf(symbol);
+			StockQuote.writeFile(price + " : " + StockQuote.dateOf(symbol), f);
+			setData(price);
+		}
 	}
 
-	public void setData(double price, double lastPrice) {
+	public void setData(double price) {
 		Calendar cal = Calendar.getInstance();
-		int maxDaysInMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH);
-		int maxDaysInYear = cal.getActualMaximum(Calendar.DAY_OF_YEAR);
+		int maxReadingsPerMonth = cal.getActualMaximum(Calendar.DAY_OF_MONTH) * 7; // 7
+																					// readings
+																					// per
+																					// day
 
 		prices.add(price);
 		NumberFormat nf = NumberFormat.getInstance();
-		nf.setMaximumFractionDigits(2);
-		double diff = price - lastPrice;
-		if (diff > 0) {
-			if (streak < 0) {
-				downStreak = (downStreak + (streak * -1)) / 2;
-				// downStreak.add((double) (streak * -1));
-				avgLow.add(price);
-				streak = 0;
-			}
-			streak++;
-			avgTrend.add((double) 1);
-			avg++;
-			upTrend.add(Double.parseDouble(nf.format(diff * multiplier)));
-		} else if (diff < 0) {
-			if (streak > 0) {
-				upStreak = (upStreak + streak) / 2;
-				// upStreak.add((double) streak);
-				avgHigh.add(price);
-				streak = 0;
-			}
-			streak--;
-			avgTrend.add((double) -1);
-			avg--;
-			downTrend.add(Double.parseDouble(nf.format(diff * -1 * multiplier)));
-		}
-		if (smallDays > slopePerDays - 1 || wipes > 0) {
+		nf.setMaximumFractionDigits(5);
+
+		if (readings > slopePerDays - 1 || wipes > 0) {
 			ArrayList<Double> lastDays = new ArrayList<Double>();
 			for (int i = prices.size() - slopePerDays; i < prices.size(); i++) {
 				lastDays.add(prices.get(i));
 			}
-			nf.setMaximumFractionDigits(5);
+
 			slope = nf.format(StockQuote.generateSlope(lastDays));
 			if (wipes == 0) {
-				gp.plotPoint(smallDays - slopePerDays, price);
-				buy.plotPoint(smallDays - slopePerDays, Double.valueOf(slope));
+				gp.plotPoint(readings - slopePerDays, price);
+				buy.plotPoint(readings - slopePerDays, Double.valueOf(slope));
 			} else {
-				gp.plotPoint(smallDays, price);
-				buy.plotPoint(smallDays, Double.valueOf(slope));
+				gp.plotPoint(readings, price);
+				buy.plotPoint(readings, Double.valueOf(slope));
 			}
 		}
-		// avgTrend.add(Double.parseDouble(nf.format(diff * multiplier)));
-		days++;
-		smallDays++;
-		lastPrice = price;
 
-		if (smallDays > maxDaysInMonth) {
+		readings++;
+
+		if (readings > maxReadingsPerMonth) {
 			wipes++;
-			smallDays = 0;
-			buy.wipe();
-		}
-		if (smallDays > maxDaysInYear) {
-			wipes++;
-			smallDays = 0;
+			readings = 0;
 			buy.wipe();
 			gp.wipe();
 		}
