@@ -272,18 +272,9 @@ public class GraphPanel extends JPanel {
 				scores.add(Double.parseDouble(line.trim()));
 			}
 		}
-
-		// Random random = new Random();
-		// int maxDataPoints = 40;
-		// int maxScore = 10;
-		// for (int i = 0; i < maxDataPoints; i++) {
-		// scores.add((double) random.nextDouble() * maxScore);
-		//// scores.add((double) i);
-		// }
 		GraphPanel mainPanel = new GraphPanel(scores);
 		mainPanel.setPreferredSize(new Dimension(800, 600));
 		frame = new JFrame(name);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setExtendedState(frame.getExtendedState() | JFrame.MAXIMIZED_BOTH);
 		frame.getContentPane().add(mainPanel);
 		frame.pack();
@@ -295,7 +286,6 @@ public class GraphPanel extends JPanel {
 		GraphPanel mainPanel = new GraphPanel(scores);
 		mainPanel.setPreferredSize(new Dimension(800, 600));
 		frame = new JFrame(name);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setExtendedState(frame.getExtendedState() | JFrame.MAXIMIZED_BOTH);
 		frame.getContentPane().add(mainPanel);
 		frame.pack();

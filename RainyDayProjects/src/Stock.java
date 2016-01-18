@@ -7,31 +7,31 @@ import java.util.TimerTask;
 
 public class Stock {
 
-	String f = System.getProperty("user.dir") + "/src/memory.txt";
+	String f = "";
 	static String symbol = "goog";
 	ArrayList<Double> prices = new ArrayList<Double>();
-	static GraphPanel gp, buy;
+	static GraphPanel buy;
 
 	static double threshold = 0.02;
 	String slope;
-	int slopePerDays = 10;
+	int slopePerReadings = 10;
 	int readings = -1;
 	int wipes = 0;
-	Date open, close;
 
 	public static void main(String[] args) {
-		gp = new GraphPanel("Stock: " + symbol);
 		buy = new GraphPanel("Bot: " + symbol);
-		gp.setTop(0);
-		gp.setBottom(0);
 		buy.setTop(threshold);
 		buy.setBottom(threshold);
-		new Stock().once();
+		new Stock("goog").once();
+	}
+	
+	public Stock(String symbol) {
+		this.symbol = symbol;
+		f = System.getProperty("user.dir") + "/src/" + symbol + "Memory.txt";
+		buy = new GraphPanel("Stock: " + symbol);
 	}
 
 	public void once() {
-		open = new Date();
-		close = new Date();
 
 		Timer timer = new Timer();
 		String memory = StockQuote.readFile(f);
@@ -73,23 +73,21 @@ public class Stock {
 																					// readings
 																					// per
 																					// day
-
+		System.out.println("Stock: " + symbol + ". Price: $" + price + ". " + StockQuote.toUTC(new Date()).toString());
 		prices.add(price);
 		NumberFormat nf = NumberFormat.getInstance();
 		nf.setMaximumFractionDigits(5);
 
-		if (readings > slopePerDays - 1 || wipes > 0) {
+		if (readings > slopePerReadings - 1 || wipes > 0) {
 			ArrayList<Double> lastDays = new ArrayList<Double>();
-			for (int i = prices.size() - slopePerDays; i < prices.size(); i++) {
+			for (int i = prices.size() - slopePerReadings; i < prices.size(); i++) {
 				lastDays.add(prices.get(i));
 			}
 
 			slope = nf.format(StockQuote.generateSlope(lastDays));
 			if (wipes == 0) {
-				gp.plotPoint(readings - slopePerDays, price);
-				buy.plotPoint(readings - slopePerDays, Double.valueOf(slope));
+				buy.plotPoint(readings - slopePerReadings, Double.valueOf(slope));
 			} else {
-				gp.plotPoint(readings, price);
 				buy.plotPoint(readings, Double.valueOf(slope));
 			}
 		}
@@ -100,7 +98,6 @@ public class Stock {
 			wipes++;
 			readings = 0;
 			buy.wipe();
-			gp.wipe();
 		}
 	}
 }
