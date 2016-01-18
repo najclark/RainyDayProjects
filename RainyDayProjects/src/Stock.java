@@ -53,32 +53,14 @@ public class Stock {
 		while (new Date().getMinutes() != 59)
 			; // Align on the hour
 		timer.schedule(hourlyTask, 0l, 1000 * 60 * 60);
-
-		while (new Date().getHours() != 24)
-			; // Align on the day
-		timer.schedule(new TimerTask() {
-			@Override
-			public void run() {
-				open = new Date();
-				close = new Date();
-
-				open = StockQuote.toUTC(open);
-				close = StockQuote.toUTC(close);
-
-				open.setHours(14);
-				open.setMinutes(30);
-				close.setHours(21);
-
-			}
-		}, 0l, 1000 * 60 * 60 * 24);
 	}
 
 	public void daily() {
 		Date cur = new Date();
 
-		cur = StockQuote.toUTC(cur);
+		StockQuote.toUTC(cur);
 
-		if (cur.after(open) && cur.before(close)) {
+		if (cur.getHours() > 14 && cur.getHours() < 21) {
 			double price = StockQuote.priceOf(symbol);
 			StockQuote.writeFile(price + " : " + StockQuote.dateOf(symbol), f);
 			setData(price);

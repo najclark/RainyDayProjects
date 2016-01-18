@@ -168,11 +168,7 @@ public class StockQuote {
 		SimpleDateFormat sdf = new SimpleDateFormat();
 		sdf.setTimeZone(new SimpleTimeZone(SimpleTimeZone.UTC_TIME, "UTC"));
 		Date utcCur = null;
-		try {
-			utcCur = sdf.parse(d.toString());
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
+		d.setMinutes(d.getMinutes() + d.getTimezoneOffset());
 		return utcCur;
 	}
 }
