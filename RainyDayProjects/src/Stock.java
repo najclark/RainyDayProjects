@@ -29,6 +29,9 @@ public class Stock {
 		this.symbol = symbol;
 		f = System.getProperty("user.dir") + "/src/" + symbol + "Memory.txt";
 		buy = new GraphPanel("Stock: " + symbol);
+		buy.setTop(threshold);
+		buy.setBottom(threshold);
+		once();
 	}
 
 	public void once() {
