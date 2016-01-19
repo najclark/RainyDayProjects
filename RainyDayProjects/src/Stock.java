@@ -2,13 +2,11 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class Stock {
 
 	String f = "";
-	static String symbol = "goog";
+	String symbol = "";
 	ArrayList<Double> prices = new ArrayList<Double>();
 	static GraphPanel buy;
 
@@ -17,16 +15,11 @@ public class Stock {
 	int slopePerReadings = 10;
 	int readings = -1;
 	int wipes = 0;
-
-	public static void main(String[] args) {
-		buy = new GraphPanel("Bot: " + symbol);
-		buy.setTop(threshold);
-		buy.setBottom(threshold);
-		new Stock("goog").once();
-	}
+	int offset;
 	
-	public Stock(String symbol) {
+	public Stock(String symbol, int offset) {
 		this.symbol = symbol;
+		this.offset = offset;
 		f = System.getProperty("user.dir") + "/src/" + symbol + "Memory.txt";
 		buy = new GraphPanel("Stock: " + symbol);
 		buy.setTop(threshold);
@@ -36,7 +29,6 @@ public class Stock {
 
 	public void once() {
 
-		Timer timer = new Timer();
 		String memory = StockQuote.readFile(f);
 		double price;
 		for (String line : memory.split("\n")) {
@@ -46,16 +38,17 @@ public class Stock {
 				setData(price);
 			}
 		}
-
-		TimerTask hourlyTask = new TimerTask() {
-			@Override
-			public void run() {
-				daily();
-			}
-		};
-		while (new Date().getMinutes() != 59)
+		Date d = new Date();
+		while (d.getMinutes() != 59 && d.getSeconds() != offset)
 			; // Align on the hour
-		timer.schedule(hourlyTask, 0l, 1000 * 60 * 60);
+		while(1 == 1){
+			daily();
+			try {
+				Thread.sleep(1000*60*60);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	public void daily() {
@@ -76,7 +69,7 @@ public class Stock {
 																					// readings
 																					// per
 																					// day
-		System.out.println("Stock: " + symbol + ". Price: $" + price + ". " + StockQuote.toUTC(new Date()).toString());
+		System.out.println("Stock: " + symbol + ". Price: $" + price);
 		prices.add(price);
 		NumberFormat nf = NumberFormat.getInstance();
 		nf.setMaximumFractionDigits(5);

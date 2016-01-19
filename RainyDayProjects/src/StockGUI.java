@@ -1,6 +1,7 @@
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.Random;
 
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -37,7 +38,7 @@ public class StockGUI {
 						if(!StockQuote.fileExists(new File(f))) {
 							StockQuote.createFile(f);
 						}
-						Stock s = new Stock(symbol);
+						Stock s = new Stock(symbol, new Random().nextInt(60));
 					}
 				}).start();
 			}
