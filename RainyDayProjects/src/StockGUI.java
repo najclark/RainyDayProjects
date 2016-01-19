@@ -29,16 +29,16 @@ public class StockGUI {
 			
 			@Override
 			public void actionPerformed(ActionEvent e) {
+				String symbol = JOptionPane.showInputDialog("Stock Symbol");
+				String f = System.getProperty("user.dir") + "/src/" + symbol + "Memory.txt";
+				if(!StockQuote.fileExists(new File(f))) {
+					StockQuote.createFile(f);
+				}
 				new Thread(new Runnable() {
 					
 					@Override
 					public void run() {
-						String symbol = JOptionPane.showInputDialog("Stock Symbol");
-						String f = System.getProperty("user.dir") + "/src/" + symbol + "Memory.txt";
-						if(!StockQuote.fileExists(new File(f))) {
-							StockQuote.createFile(f);
-						}
-						Stock s = new Stock(symbol, new Random().nextInt(60));
+						Stock s = new Stock(symbol);
 					}
 				}).start();
 			}

@@ -15,11 +15,9 @@ public class Stock {
 	int slopePerReadings = 10;
 	int readings = -1;
 	int wipes = 0;
-	int offset;
-	
-	public Stock(String symbol, int offset) {
+
+	public Stock(String symbol) {
 		this.symbol = symbol;
-		this.offset = offset;
 		f = System.getProperty("user.dir") + "/src/" + symbol + "Memory.txt";
 		buy = new GraphPanel("Stock: " + symbol);
 		buy.setTop(threshold);
@@ -38,13 +36,17 @@ public class Stock {
 				setData(price);
 			}
 		}
-		Date d = new Date();
-		while (d.getMinutes() != 59 && d.getSeconds() != offset)
-			; // Align on the hour
-		while(1 == 1){
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(new Date());
+		int minutes = calendar.get(Calendar.MINUTE);
+		while (minutes != 59) {
+			minutes = calendar.get(Calendar.MINUTE);
+			// Align on the hour
+		}
+		while (true) {
 			daily();
 			try {
-				Thread.sleep(1000*60*60);
+				Thread.sleep(1000 * 60 * 60);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
@@ -55,8 +57,10 @@ public class Stock {
 		Date cur = new Date();
 
 		StockQuote.toUTC(cur);
-
-		if (cur.getHours() > 14 && cur.getHours() < 21) {
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(cur);
+		int hours = calendar.get(Calendar.HOUR);
+		if (hours >= 14 && hours <= 21) {
 			double price = StockQuote.priceOf(symbol);
 			StockQuote.writeFile(price + " : " + StockQuote.dateOf(symbol), f);
 			setData(price);
