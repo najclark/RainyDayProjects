@@ -1,7 +1,12 @@
+import java.text.DateFormat;
 import java.text.NumberFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class Stock {
 
@@ -15,8 +20,10 @@ public class Stock {
 	int slopePerReadings = 10;
 	int readings = -1;
 	int wipes = 0;
+	int offset = 0;
 
-	public Stock(String symbol) {
+	public Stock(String symbol, int offset) {
+		this.offset = offset;
 		this.symbol = symbol;
 		f = System.getProperty("user.dir") + "/src/" + symbol + "Memory.txt";
 		buy = new GraphPanel("Stock: " + symbol);
@@ -36,21 +43,27 @@ public class Stock {
 				setData(price);
 			}
 		}
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(new Date());
-		int minutes = calendar.get(Calendar.MINUTE);
-		while (minutes != 59) {
-			minutes = calendar.get(Calendar.MINUTE);
-			// Align on the hour
+		
+		Calendar c = Calendar.getInstance();
+		DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		Date date = null;
+		try {
+			date = dateFormatter.parse(c.get(Calendar.YEAR)+"-"+(c.get(Calendar.MONTH)+1)+"-"+c.get(Calendar.DAY_OF_MONTH)+" "+
+					c.get(Calendar.HOUR_OF_DAY)+":"+59+":"+offset);
+		} catch (ParseException e1) {
+			e1.printStackTrace();
 		}
-		while (true) {
-			daily();
-			try {
-				Thread.sleep(1000 * 60 * 60);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
+		
+		int period = 1000*60*60;
+		Timer timer = new Timer();
+		timer.schedule(new TimerTask(){
+
+			@Override
+			public void run() {
+				daily();
 			}
-		}
+			
+		}, date, period);
 	}
 
 	public void daily() {
@@ -73,7 +86,7 @@ public class Stock {
 																					// readings
 																					// per
 																					// day
-		System.out.println("Stock: " + symbol + ". Price: $" + price);
+		System.out.println("Stock: " + symbol + ". Price: $" + price + ". Time: " + cal.getTime().toString());
 		prices.add(price);
 		NumberFormat nf = NumberFormat.getInstance();
 		nf.setMaximumFractionDigits(5);
@@ -85,6 +98,13 @@ public class Stock {
 			}
 
 			slope = nf.format(StockQuote.generateSlope(lastDays));
+			if(Double.parseDouble(slope) > threshold){
+				SendEmail.sendEmail("Stock: " + symbol, "The current stock has gone above the set threshold(" + threshold + "). We are predicting " + symbol + " to drop soon.", username, password);
+			}
+			else if(Double.parseDouble(slope) < -threshold){
+				SendEmail.sendEmail("Stock: " + symbol, "The current stock has gone below the set threshold(" + -threshold + "). We are predicting " + symbol + " to rise soon.", username, password);
+			}
+			
 			if (wipes == 0) {
 				buy.plotPoint(readings - slopePerReadings, Double.valueOf(slope));
 			} else {

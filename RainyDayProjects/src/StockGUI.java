@@ -10,6 +10,8 @@ import javax.swing.JPanel;
 
 public class StockGUI {
 
+	int threads = 0;
+	
 	public static void main(String[] args) {
 		new StockGUI().setup();
 	}
@@ -34,11 +36,12 @@ public class StockGUI {
 				if(!StockQuote.fileExists(new File(f))) {
 					StockQuote.createFile(f);
 				}
+				threads++;
 				new Thread(new Runnable() {
 					
 					@Override
 					public void run() {
-						Stock s = new Stock(symbol);
+						Stock s = new Stock(symbol, 60-threads);
 					}
 				}).start();
 			}
