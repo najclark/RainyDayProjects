@@ -183,7 +183,6 @@ public class StockQuote {
 	public static void createFile(String f) {
 		try {
 			PrintWriter writer = new PrintWriter(f, "UTF-8");
-			writer.print("");
 			writer.close();
 		} catch (FileNotFoundException | UnsupportedEncodingException e) {
 			e.printStackTrace();

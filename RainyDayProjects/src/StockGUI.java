@@ -42,6 +42,7 @@ public class StockGUI {
 					@Override
 					public void run() {
 						Stock s = new Stock(symbol, 60-threads);
+						s.once();
 					}
 				}).start();
 			}

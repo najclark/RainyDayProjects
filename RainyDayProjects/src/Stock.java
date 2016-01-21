@@ -1,12 +1,7 @@
-import java.text.DateFormat;
 import java.text.NumberFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class Stock {
 
@@ -29,7 +24,6 @@ public class Stock {
 		buy = new GraphPanel("Stock: " + symbol);
 		buy.setTop(threshold);
 		buy.setBottom(threshold);
-		once();
 	}
 
 	public void once() {
@@ -45,25 +39,26 @@ public class Stock {
 		}
 		
 		Calendar c = Calendar.getInstance();
-		DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		Date date = null;
-		try {
-			date = dateFormatter.parse(c.get(Calendar.YEAR)+"-"+(c.get(Calendar.MONTH)+1)+"-"+c.get(Calendar.DAY_OF_MONTH)+" "+
-					c.get(Calendar.HOUR_OF_DAY)+":"+59+":"+offset);
-		} catch (ParseException e1) {
-			e1.printStackTrace();
-		}
 		
-		int period = 1000*60*60;
-		Timer timer = new Timer();
-		timer.schedule(new TimerTask(){
-
-			@Override
-			public void run() {
+		c.set(Calendar.MINUTE, 59);
+		c.set(Calendar.SECOND, offset);
+		
+		long wait = c.getTimeInMillis()-System.currentTimeMillis();
+		System.out.println(wait);
+		try {
+			Thread.sleep(wait);
+			System.out.println("Aligned Thread: " + (60-offset));
+			while(true) {
 				daily();
+				
+				c.set(Calendar.MINUTE, 59);
+				c.set(Calendar.SECOND, offset);
+				wait = c.getTimeInMillis()-System.currentTimeMillis();
+				Thread.sleep(wait);
 			}
-			
-		}, date, period);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 
 	public void daily() {
@@ -77,6 +72,16 @@ public class Stock {
 			double price = StockQuote.priceOf(symbol);
 			StockQuote.writeFile(price + " : " + StockQuote.dateOf(symbol), f);
 			setData(price);
+
+			String username = "";
+			String password = "";
+			
+			if(Double.parseDouble(slope) > threshold){
+				SendEmail.sendEmail("Stock: " + symbol, "The current stock has gone above the set threshold(" + threshold + "). We are predicting " + symbol + " to drop soon.", username, password);
+			}
+			else if(Double.parseDouble(slope) < -threshold){
+				SendEmail.sendEmail("Stock: " + symbol, "The current stock has gone below the set threshold(" + -threshold + "). We are predicting " + symbol + " to rise soon.", username, password);
+			}
 		}
 	}
 
@@ -98,12 +103,6 @@ public class Stock {
 			}
 
 			slope = nf.format(StockQuote.generateSlope(lastDays));
-			if(Double.parseDouble(slope) > threshold){
-				SendEmail.sendEmail("Stock: " + symbol, "The current stock has gone above the set threshold(" + threshold + "). We are predicting " + symbol + " to drop soon.", username, password);
-			}
-			else if(Double.parseDouble(slope) < -threshold){
-				SendEmail.sendEmail("Stock: " + symbol, "The current stock has gone below the set threshold(" + -threshold + "). We are predicting " + symbol + " to rise soon.", username, password);
-			}
 			
 			if (wipes == 0) {
 				buy.plotPoint(readings - slopePerReadings, Double.valueOf(slope));
