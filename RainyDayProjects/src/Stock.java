@@ -24,6 +24,7 @@ public class Stock {
 		buy = new GraphPanel("Stock: " + symbol);
 		buy.setTop(threshold);
 		buy.setBottom(threshold);
+		System.out.println("Initialized Thread: " + (60-offset));
 	}
 
 	public void once() {
@@ -44,13 +45,13 @@ public class Stock {
 		c.set(Calendar.SECOND, offset);
 		
 		long wait = c.getTimeInMillis()-System.currentTimeMillis();
-		System.out.println(wait);
 		try {
 			Thread.sleep(wait);
 			System.out.println("Aligned Thread: " + (60-offset));
 			while(true) {
 				daily();
 				
+				c.add(Calendar.HOUR_OF_DAY, 1);
 				c.set(Calendar.MINUTE, 59);
 				c.set(Calendar.SECOND, offset);
 				wait = c.getTimeInMillis()-System.currentTimeMillis();

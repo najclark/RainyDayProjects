@@ -231,11 +231,6 @@ public class GraphPanel extends JPanel {
 		}
 	}
 
-	// @Override
-	// public Dimension getPreferredSize() {
-	// return new Dimension(width, heigth);
-	// }
-
 	private double getMinScore() {
 		double minScore = Double.MAX_VALUE;
 		for (int i = 0; i < scores.size(); i++) {
@@ -275,7 +270,6 @@ public class GraphPanel extends JPanel {
 		GraphPanel mainPanel = new GraphPanel(scores);
 		mainPanel.setPreferredSize(new Dimension(800, 600));
 		frame = new JFrame(name);
-		frame.setExtendedState(frame.getExtendedState() | JFrame.MAXIMIZED_BOTH);
 		frame.getContentPane().add(mainPanel);
 		frame.pack();
 		frame.setLocationRelativeTo(null);
@@ -286,11 +280,14 @@ public class GraphPanel extends JPanel {
 		GraphPanel mainPanel = new GraphPanel(scores);
 		mainPanel.setPreferredSize(new Dimension(800, 600));
 		frame = new JFrame(name);
-		frame.setExtendedState(frame.getExtendedState() | JFrame.MAXIMIZED_BOTH);
 		frame.getContentPane().add(mainPanel);
 		frame.pack();
 		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
+	}
+	
+	public JFrame getFrame() {
+		return this.frame;
 	}
 
 	public static void main(String[] args) {
