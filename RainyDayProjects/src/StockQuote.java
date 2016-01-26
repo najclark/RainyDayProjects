@@ -5,43 +5,34 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
-import java.util.SimpleTimeZone;
+import java.util.Calendar;
+import java.util.Scanner;
 
 public class StockQuote {
 
 	// Given symbol, get HTML
 	private static String readHTML(String symbol) {
 		URL url;
-		InputStream is = null;
-		BufferedReader br;
-		String line, html = "";
+		String html = "";
 		try {
-			url = new URL("http://finance.yahoo.com/q?s=" + symbol);
-			is = url.openStream(); // throws an IOException
-			br = new BufferedReader(new InputStreamReader(is));
-			while ((line = br.readLine()) != null) {
-				html += line;
+			url = new URL("http://www.finance.yahoo.com/q?s=" + symbol);
+			Scanner s = new Scanner(url.openStream());
+			while (s.hasNext()) {
+				html += s.nextLine();
 			}
+			s.close();
 		} catch (MalformedURLException mue) {
-			mue.printStackTrace();
+			//mue.printStackTrace();
+			System.err.println("MalformedURLException");
 		} catch (IOException ioe) {
-			ioe.printStackTrace();
-		} finally {
-			try {
-				if (is != null)
-					is.close();
-			} catch (IOException ioe) {
-			}
+			//ioe.printStackTrace();
+			System.err.println("IOException");
 		}
 		return html;
 	}
@@ -111,6 +102,22 @@ public class StockQuote {
 		return null;
 	}
 	
+	public static String quickWrite(String txt, String path) {
+		try {
+			String total = "";
+			BufferedWriter bw = new BufferedWriter(new FileWriter(path));
+
+			total += txt + "\n";
+			bw.write(total);
+			bw.close();
+
+			return total;
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
 	public static void wipeFile(String path){
 		try {
 			BufferedWriter bw = new BufferedWriter(new FileWriter(path));
@@ -167,12 +174,11 @@ public class StockQuote {
 		return (meanX * meanY - meanXY)/(meanX * meanX - meanX2);
 	}
 	
-	public static Date toUTC(Date d) {
-		SimpleDateFormat sdf = new SimpleDateFormat();
-		sdf.setTimeZone(new SimpleTimeZone(SimpleTimeZone.UTC_TIME, "UTC"));
-		Date utcCur = null;
-		d.setMinutes(d.getMinutes() + d.getTimezoneOffset());
-		return utcCur;
+	public static Calendar utcToLocal(Calendar calendar) {
+		Calendar cal = Calendar.getInstance();
+		int diff = (cal.get(cal.ZONE_OFFSET) + cal.get(cal.DST_OFFSET)) / (60 * 1000);
+		calendar.add(Calendar.MINUTE, diff);
+		return calendar;
 	}
 	
 	public static boolean fileExists(File f) {

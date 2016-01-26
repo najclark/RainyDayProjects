@@ -55,6 +55,8 @@ public class GraphPanel extends JPanel {
 	public void plotPoint(double y) {
 		scores.add(y);
 		this.repaint();
+		frame.setSize(frame.getWidth()+1, frame.getHeight()+1);
+		frame.setSize(frame.getWidth()-1, frame.getHeight()-1);
 		frame.repaint();
 	}
 

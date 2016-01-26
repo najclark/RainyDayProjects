@@ -53,17 +53,7 @@ public class StockGUI {
 
 							@Override
 							public void actionPerformed(ActionEvent e) {
-								String memory = StockQuote
-										.readFile(System.getProperty("user.dir") + "/src/" + symbol + "Memory.txt");
-
-								GraphPanel gp = new GraphPanel("History: " + symbol);
-
-								for (String line : memory.split("\n")) {
-									if (line != "") {
-										gp.plotPoint(Double.parseDouble(line.split(":")[0].trim()));
-									}
-								}
-
+								s.showHistory();
 							}
 						});
 						panel.add(btn);
